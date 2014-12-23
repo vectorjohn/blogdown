@@ -1,0 +1,1 @@
+A blog in markdown. That's what I have so far.
