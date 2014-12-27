@@ -11,4 +11,6 @@ You can:
 4. ???
 5. Profit
 
-Maybe links even work! http://google.com
+Lets try linking to [another page](example).
+
+Maybe links even work automatically! http://google.com

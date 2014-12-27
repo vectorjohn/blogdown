@@ -1,31 +1,68 @@
 package main
 
 import (
-	"github.com/russross/blackfriday"
 	"fmt"
-	//"net/http"
-	"os"
+	"github.com/russross/blackfriday"
 	"io/ioutil"
+	"net/http"
+	"os"
+	"strconv"
 )
 
 type ServerConfig struct {
-	PagePath	string	`json:"page_path"`
-	WebRoot	string	`json:"web_root"`
-	Index	string	`json:"index"`
-	Port	int	`json:"port"`
+	PagePath string `json:"page_path"`
+	WebRoot  string `json:"web_root"`
+	Index    string `json:"index"`
+	Port     int    `json:"port"`
 }
 
 var config *ServerConfig = &ServerConfig{"pages", "www", "index", 4003}
 
 func main() {
-	data, err := loadFile(config.Index)
+	/*
+		data, err := loadFile(config.Index)
+		if err != nil {
+			fmt.Println( err.Error() )
+			return
+		}
+
+		output := blackfriday.MarkdownCommon(data)
+		fmt.Println(string(output))
+	*/
+
+	indexServer := pageServer("index")
+	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/" {
+			indexServer(resp, req)
+			return
+		}
+
+		pageServer(req.URL.Path)(resp, req)
+	})
+
+	listenOn := "localhost:" + strconv.Itoa(config.Port)
+	fmt.Println("Listening on: " + listenOn)
+	http.ListenAndServe(listenOn, nil)
+}
+
+func pageServer(page string) func(http.ResponseWriter, *http.Request) {
+	data, err := loadFile(page)
 	if err != nil {
-		fmt.Println( err.Error() )
-		return
+		if page == "404" {
+			return internalServerError
+		}
+
+		return pageServer("404")
 	}
 
-	output := blackfriday.MarkdownCommon(data)
-	fmt.Println(string(output))
+	data = blackfriday.MarkdownCommon(data)
+	return func(resp http.ResponseWriter, req *http.Request) {
+		resp.Write(data)
+	}
+}
+
+func internalServerError(resp http.ResponseWriter, req *http.Request) {
+	resp.Write([]byte("The server had a big problem."))
 }
 
 func loadFile(name string) ([]byte, error) {
