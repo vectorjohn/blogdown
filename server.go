@@ -38,9 +38,10 @@ func main() {
 
 	if 1==1 {
 		docstore := &FSDocumentStore{Root: "data"}
-		var out interface{}
+		var out Document
 		out, _ = docstore.Insert(&TestData{"Hello world", 1234, "bla bla bla"})
-		out, _ = docstore.Insert(&map[string]interface{}{"foo":"bar", "baz": 11})
+		out, _ = docstore.Insert(&Document{"foo":"bar", "baz": 11})
+		out, _ = docstore.Find("19291aee-3208-470a-9686-3bcc2386ec91")
 		fmt.Println(out)
 		return
 	}

@@ -13,7 +13,7 @@ type FSDocumentStore struct {
 	Root string
 }
 
-func (this *FSDocumentStore) Insert(doc interface{}) (interface{}, error) {
+func (this *FSDocumentStore) Insert(doc interface{}) (Document, error) {
 	jsonbytes, err := json.Marshal(doc)
 
 	if err != nil {
@@ -27,10 +27,29 @@ func (this *FSDocumentStore) Insert(doc interface{}) (interface{}, error) {
 
 	ioutil.WriteFile(filepath.Join(this.Root,  id + ".json"), jsonbytes, 0666)
 
-	out := map[string]interface{}{}
+	out := Document{}
 	err = json.Unmarshal(jsonbytes, &out)
-
+	if err != nil {
+		return nil, err
+	}
 	out["_id"] = id
 
-	return out, err
+	return out, nil
+}
+
+func (this *FSDocumentStore) Find(id string) (Document, error) {
+	jsonbytes, err := ioutil.ReadFile(filepath.Join(this.Root, id + ".json"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	out := Document{}
+	err = json.Unmarshal(jsonbytes, &out)
+	if err != nil {
+		return nil, err
+	}
+	out["_id"] = id
+
+	return out, nil
 }

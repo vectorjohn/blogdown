@@ -1,6 +1,10 @@
 package main
 
+type Document map[string]interface{}
+
 type DocumentStore interface {
-	Insert(interface{}) (interface{}, error)
-	Update(id string, update interface{}) error
+	Insert(doc interface{}) (Document, error)
+	Update(id string, doc interface{}) error
+	Find(id string) (Document, error)
 }
+
