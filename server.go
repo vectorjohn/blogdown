@@ -16,6 +16,12 @@ type ServerConfig struct {
 	Port     int    `json:"port"`
 }
 
+type TestData struct {
+	Foo string
+	Bar int
+	baz string
+}
+
 var config *ServerConfig = &ServerConfig{"pages", "www", "index", 4003}
 
 func main() {
@@ -29,6 +35,15 @@ func main() {
 		output := blackfriday.MarkdownCommon(data)
 		fmt.Println(string(output))
 	*/
+
+	if 1==1 {
+		docstore := &FSDocumentStore{Root: "data"}
+		var out interface{}
+		out, _ = docstore.Insert(&TestData{"Hello world", 1234, "bla bla bla"})
+		out, _ = docstore.Insert(&map[string]interface{}{"foo":"bar", "baz": 11})
+		fmt.Println(out)
+		return
+	}
 
 	indexServer := pageServer("index")
 	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
