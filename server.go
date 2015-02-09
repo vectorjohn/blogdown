@@ -38,13 +38,24 @@ func main() {
 
 	if 1==1 {
 		docstore := &FSDocumentStore{Root: "data"}
+		/*
 		var out Document
 		out, _ = docstore.Insert(&TestData{"Hello world", 1234, "bla bla bla"})
 		out, _ = docstore.Insert(&Document{"foo":"bar", "baz": 11})
 		out, _ = docstore.Find("19291aee-3208-470a-9686-3bcc2386ec91")
 		fmt.Println(out)
+		*/
+		all, err := docstore.FindAll()
+		fmt.Println("ALL: ", all)
+		all = all.Filter(func(doc Document, i int) bool {
+			return doc["foo"] == "bar"
+		})
+		fmt.Println(err)
+		fmt.Println("SOME: ", all)
 		return
 	}
+
+	http.HandleFunc("/admin", configHandler(config, admin_handler))
 
 	indexServer := pageServer("index")
 	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
@@ -59,6 +70,10 @@ func main() {
 	listenOn := "localhost:" + strconv.Itoa(config.Port)
 	fmt.Println("Listening on: " + listenOn)
 	http.ListenAndServe(listenOn, nil)
+}
+
+func configHandler(conf ServerConfig, handler func(resp http.ResponseWriter, req *http.Request)) {
+	handler(conf, resp, req)
 }
 
 func pageServer(page string) func(http.ResponseWriter, *http.Request) {
